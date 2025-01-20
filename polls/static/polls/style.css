@@ -1,0 +1,10 @@
+li a {
+    background-color: lightgrey;
+  color: blue;
+}
+body {
+    background: white url("images/background.jpg") no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
