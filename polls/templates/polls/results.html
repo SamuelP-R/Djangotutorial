@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="{% static 'polls/style.css' %}">
 </head>
 <body>
+    <div class="centered-div">
+        <div>
     <h1>{{ question.question_text }}</h1>
 
 <ul>
@@ -16,6 +18,8 @@
 {% endfor %}
 </ul>
 
-<a href="{% url 'polls:detail' question.id %}">Vote again?</a>
+<a href="{% url 'polls:index' %}">Regresar al Inicio</a>
+        </div>
+    </div>
 </body>
 </html>
