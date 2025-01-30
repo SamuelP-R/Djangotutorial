@@ -20,6 +20,8 @@ class Question(models.Model):
         now = timezone.now()
         return now - datetime.timedelta(days=1) <= self.pub_date <= now
     
+responses = models.ManyToManyField('auth.User', through='Response')
+
 
 class Choice(models.Model):
     question = models.ForeignKey(Question,
@@ -28,3 +30,8 @@ on_delete=models.CASCADE)
     votes = models.IntegerField(default=0)
     def __str__(self):
         return self.choice_text
+    
+class Response(models.Model):
+    questions = models.ForeignKey(Question, on_delete=models.CASCADE)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    Choice = models.ForeignKey('Choice', on_delete=models.CASCADE)
