@@ -9,30 +9,31 @@
 </head>
 <body>
 <div class="centered-div">
-    <div>
-        <form action="{% url 'polls:vote' question.id %}" method="post">
-            {% csrf_token %}
-            <fieldset>
-                <legend><h1>{{ question.question_text }}</h1></legend>
-                {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-                {% for choice in question.choice_set.all %}
-                    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-                    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-                {% endfor %}
-            </fieldset>
-            {% if user.is_authenticated %}
-            <input type="submit" value="Vote">
-            {% else %}
-            <p>Inicia Sesion para poder votar</p>
-            <a href="{% url 'login' %}?next={{ request.path }}" class="top-right">Iniciar sesión</a>
-            {% endif %}
+    <div class="question">
+        {% if user.is_authenticated %}
+        {% if user_has_voted %}
+        <p><strong>Ya has votado en esta encuesta. 👀</strong></p>
+        {% else %}
+            <form action="{% url 'polls:vote' question.id %}" method="post">
+                {% csrf_token %}
+                <fieldset>
+                    <legend><h1>{{ question.question_text }}</h1></legend>
+                    {% if error_message %}
+                        <p><strong>{{ error_message }}</strong></p>
+                    {% endif %}
+                    {% for choice in question.choice_set.all %}
+                        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+                    {% endfor %}
+                    <input type="submit" value="Votar">
+                </fieldset>
             </form>
+        {% endif %}
+    {% else %}
+        <p>🔒 Inicia sesión para votar.</p>
+    {% endif %}
+    
     </div>
 </div>
-    
-
 </body>
 </html>
-
-
-

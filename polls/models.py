@@ -20,7 +20,6 @@ class Question(models.Model):
         now = timezone.now()
         return now - datetime.timedelta(days=1) <= self.pub_date <= now
     
-responses = models.ManyToManyField('auth.User', through='Response')
 
 
 class Choice(models.Model):
@@ -31,7 +30,17 @@ on_delete=models.CASCADE)
     def __str__(self):
         return self.choice_text
     
-class Response(models.Model):
-    questions = models.ForeignKey(Question, on_delete=models.CASCADE)
+
+# Modelo para registrar quien ya ha votado
+class Voted(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    Choice = models.ForeignKey('Choice', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    vote_date = models.DateTimeField(auto_now_add=True)
+    #Solo un usuario puede votar una pregunta 
+    class Meta:
+        unique_together = ('user', 'question')
+
+    def __str__(self):
+        return f'{self.user} voto en "{self.question}" por "{self.choice}"'
+    
