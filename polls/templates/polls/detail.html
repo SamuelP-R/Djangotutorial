@@ -8,11 +8,20 @@
     <link rel="stylesheet" href="{% static 'polls/style.css' %}">
 </head>
 <body>
+ <!-- Contenedor centrado -->
 <div class="centered-div">
     <div class="question">
         {% if user.is_authenticated %}
         {% if user_has_voted %}
         <p><strong>Ya has votado en esta encuesta. 👀</strong></p>
+        <a href="{% url 'polls:index' %}" class="top-right">Regresar al Inicio</a>
+        <form action="{% url 'polls:delete_vote' question.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit">❌ Cancelar voto</button>
+        </form>
+
+
+
         {% else %}
             <form action="{% url 'polls:vote' question.id %}" method="post">
                 {% csrf_token %}
@@ -29,8 +38,15 @@
                 </fieldset>
             </form>
         {% endif %}
+        <a href="{% url 'polls:index' %}" class="top-right">Regresar al Inicio</a>
     {% else %}
         <p>🔒 Inicia sesión para votar.</p>
+        <!--Inicio de Sesión o Cerrar Sesión -->
+      {% if user.is_authenticated %}
+      <a href="{% url 'logout' %}?next={{ request.path }}" class="top-right">Cerrar sesión</a>
+      {% else %}
+      <a href="{% url 'login' %}?next={{ request.path }}" class="top-right">Iniciar sesión</a>
+     {% endif %}
     {% endif %}
     
     </div>

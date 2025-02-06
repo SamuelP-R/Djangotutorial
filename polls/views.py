@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from django.db.models import F
-from django.views.generic import DetailView
+from django.urls import reverse
+from django.views.generic import DetailView, View
 from .models import Choice, Question, Voted
 from django.views import generic
 from django.utils import timezone
@@ -17,9 +17,19 @@ class IndexView(generic.ListView):
     Return the last five published questions (not including those set to be
     published in the future).
     """
-        return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[
-        :5
-    ]
+        return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            latest_vote = Voted.objects.filter(user=self.request.user).order_by('-vote_date').first()
+            if latest_vote:
+                context["latest_vote_date"] = latest_vote.vote_date
+                context["latest_question"] = latest_vote.question
+            else:
+                context["latest_vote_date"] = None
+                context["latest_question"] = None
+        return context
 
 
 class DetailView(DetailView):
@@ -36,11 +46,22 @@ class DetailView(DetailView):
             user=self.request.user, question=question
         ).exists() if self.request.user.is_authenticated else False
 
-        print(f'Usuario: {self.request.user}, Ha votado: {user_has_voted}')  # 👀 Ver en consola
+        print(f'Usuario: {self.request.user}, Ha votado: {user_has_voted}')  # Ver en consola
 
         context["user_has_voted"] = user_has_voted
         return context
  
+
+class DeleteVoteView(View):
+    def post(self, request, *args, **kwargs):
+        question_id = self.kwargs.get("question_id")
+        vote = Voted.objects.filter(user=self.request.user, question_id=question_id).first()
+
+        if vote:
+            vote.choice.votes = max(0, vote.choice.votes - 1)
+            vote.choice.save()
+            vote.delete()#borra el voto del usuario que esta logiado
+        return redirect(reverse("polls:detail", kwargs={"pk": question_id}))
 
 class ResultsView(generic.DetailView):
     model = Question

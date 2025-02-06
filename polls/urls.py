@@ -14,4 +14,6 @@ urlpatterns = [
     path("<int:question_id>/vote/", views.vote, name="vote"),
     
     path('accounts/', include('django.contrib.auth.urls')),
+
+    path("<int:question_id>/delete-vote/", views.DeleteVoteView.as_view(), name="delete_vote"),
 ]
