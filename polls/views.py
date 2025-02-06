@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
-from django.views.generic import DetailView, View
+from django.views.generic import DetailView, View, ListView
 from .models import Choice, Question, Voted
 from django.views import generic
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth.mixins import UserPassesTestMixin
+
 
 # Create your views here.
 #First view 
@@ -40,6 +42,9 @@ class DetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         question = self.get_object()
+
+        # verifica si la cuenta esta activa
+        context["is_active"] = question.is_active
 
         # Verificar si el usuario ha votado en esta pregunta
         user_has_voted = Voted.objects.filter(
@@ -101,3 +106,41 @@ def index(request):
     latest_question_list = Question.objects.order_by("-pub_date")[:5]
     context = {"latest_question_list": latest_question_list}
     return render(request, "polls/index.html", context)
+
+
+class DisableQuestionView(UserPassesTestMixin, View):
+    def test_func(self):
+        """
+        Solo el admin tiene acceso a ala cuenta.
+        """
+        question = get_object_or_404(Question, pk=self.kwargs["pk"])
+        return self.request.user.is_staff or question.created_by == self.request.user
+
+    def post(self, request, *args, **kwargs):
+        question = get_object_or_404(Question, pk=self.kwargs["pk"])
+        question.is_active = False
+        question.save()
+        return redirect(reverse("polls:results", kwargs={"pk": question.pk}))
+    
+
+
+class EnableQuestionView(UserPassesTestMixin, View):
+    def test_func(self):
+        """
+        Solo el admin tiene acceso a la cuenta.
+        """
+        question = get_object_or_404(Question, pk=self.kwargs["pk"])
+        return self.request.user.is_staff or question.created_by == self.request.user
+
+    def post(self, request, *args, **kwargs):
+        question = get_object_or_404(Question, pk=self.kwargs["pk"])
+        question.is_active = True
+        question.save()
+        return redirect(reverse("polls:results", kwargs={"pk": question.pk}))
+
+
+
+class AllResultsView(ListView):
+    model = Question
+    template_name = "polls/all_results.html"
+    context_object_name = "questions"

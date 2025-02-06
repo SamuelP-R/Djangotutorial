@@ -1,5 +1,6 @@
 from django.urls import include, path
 from . import views
+from .views import AllResultsView
 
 
 app_name = "polls"
@@ -16,4 +17,10 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
 
     path("<int:question_id>/delete-vote/", views.DeleteVoteView.as_view(), name="delete_vote"),
+
+    path("<int:pk>/disable/", views.DisableQuestionView.as_view(), name="disable"),
+
+    path("<int:pk>/enable/", views.EnableQuestionView.as_view(), name="enable"),
+
+    path('allresults/', AllResultsView.as_view(), name='all_results'),
 ]
