@@ -6,46 +6,32 @@
     <title>Polls</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'polls/style.css' %}">
-    <style>
-        /* Botón en la esquina superior derecha */
-        .top-right {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 10px 20px;
-            background-color: #04AA6D;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .top-right:hover {
-            background-color:rgb(137, 157, 179);
-        }
-
-        /* Contenedor centrado */
-        .centered-div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh; /* Altura de toda la ventana */
-        }
-
-        h1 {
-            margin-bottom: 20px; /* Espaciado inferior */
-        }
-    </style>
+    
 </head>
 <body>
-      <!--Inicio de Sesión o Cerrar Sesión -->
+      <!--Nav bar -->
+      <nav class="menu">
+        <ul>
+          <li><a href="{% url 'polls:index' %}">Inicio</a></li>
+          <a href="{% url 'polls:all_results' %}">Resultados</a>
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'logout' %}?next={{ request.path }}">Cerrar Sesion</a></li>
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'admin:index' %}">Admin</a></li>
+                {% endif %}
+            {% else %}
+          <li><a href="{% url 'login' %}?next={{ request.path }}">Iniciar Sesion</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+       
+      <!--Inicio de Sesión o Cerrar Sesión 
       {% if user.is_authenticated %}
       <a href="{% url 'logout' %}?next={{ request.path }}" class="top-right">Cerrar sesión</a>
       {% else %}
       <a href="{% url 'login' %}?next={{ request.path }}" class="top-right">Iniciar sesión</a>
      {% endif %}
-
+      -->
     <!-- Contenedor centrado -->
     <div class="centered-div">
         <div>
@@ -58,7 +44,18 @@
                 {% endfor %}
                 </ul>
             {% else %}
-                <p>No polls are available.</p>
+                <p>No hay encuestas disponibles.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="centered-div">
+        <div>
+            <h1>Ultima Encuesta Respondida</h1>
+            {% if latest_question %}
+            <p>Encuesta: <string>{{ latest_question.question_text }}</strong/></p>
+            <p>Fecha de respuesta: <strong>{{ latest_vote_date }}</strong></p>
+            {% else %}
+            <p>No se respondio ninguna encuesta</p>
             {% endif %}
         </div>
     </div>

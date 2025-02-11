@@ -1,0 +1,51 @@
+<div class="centered-div">
+    <div>
+        {% if question.is_active %}
+            {% if user.is_authenticated and user_has_voted %}
+                <p>Ya has votado esta encuesta.</p>
+            {% else %}
+                <form action="{% url 'polls:vote' question.id %}" method="post">
+                    {% csrf_token %}
+                    <fieldset>
+                        <legend><h1>{{ question.question_text }}</h1></legend>
+                        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+                        {% for choice in question.choice_set.all %}
+                            <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+                        {% endfor %}
+                        <input type="submit" value="Votar">
+                    </fieldset>
+                </form>
+            {% endif %}
+        {% else %}
+            <p>Esta encuesta ha finalizado. Puedes ver los resultados.</p>
+        {% endif %}
+    </div>
+</div>
+
+
+
+
+
+{% if user.is_authenticated and (user.is_staff or question.created_by == user) %}
+    <form action="{% url 'polls:disable' question.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Finalizar Encuesta</button>
+    </form>
+{% endif %}
+
+
+
+{% if user.is_authenticated %}
+    {% if user.is_staff %}
+        <form action="{% url 'polls:disable' question.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Finalizar Encuesta</button>
+        </form>
+    {% elif question.created_by == user %}
+        <form action="{% url 'polls:disable' question.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Finalizar Encuesta</button>
+        </form>
+    {% endif %}
+{% endif %}
