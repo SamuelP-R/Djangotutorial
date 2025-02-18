@@ -8,7 +8,6 @@ from simple_history.models import HistoricalRecords
 
 
 
-
 # Primer  Modelo
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
@@ -50,4 +49,3 @@ class Voted(models.Model):
 
     def __str__(self):
         return f'{self.user} voto en "{self.question}" por "{self.choice}"'
-    
